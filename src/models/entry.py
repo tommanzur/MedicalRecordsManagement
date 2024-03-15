@@ -1,4 +1,4 @@
-from patient import db
+from models.patient import db
 
 class Entry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
