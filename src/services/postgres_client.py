@@ -2,8 +2,8 @@ import os
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
-from src.models.patient import Patient, db as patient_db
-from src.models.entry import Entry, db as entry_db
+from models.patient import Patient, db as patient_db
+from models.entry import Entry, db as entry_db
 
 class PostgresClient:
     def __init__(self):
