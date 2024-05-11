@@ -1,4 +1,6 @@
+import json
 import os
+from flask import jsonify
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
@@ -69,6 +71,9 @@ class PostgresClient:
     def add_entry(self, **kwargs):
         session = self.Session()
         try:
+            if 'notes' in kwargs and kwargs['notes'] is not None:
+                if not isinstance(kwargs['notes'], list):
+                    kwargs['notes'] = [kwargs['notes']]
             new_entry = Entry(**kwargs)
             session.add(new_entry)
             session.commit()
@@ -93,7 +98,15 @@ class PostgresClient:
             entry = session.query(Entry).get(entry_id)
             if entry:
                 for key, value in kwargs.items():
-                    setattr(entry, key, value)
+                    if key == 'notes':
+                        current_notes = entry.notes
+                        if isinstance(current_notes, str):
+                            current_notes = json.loads(current_notes) if current_notes else []
+                        if value is not None:
+                            current_notes.append(str(value))
+                        setattr(entry, key, current_notes)
+                    else:
+                        setattr(entry, key, value)
                 session.commit()
         except SQLAlchemyError as e:
             session.rollback()

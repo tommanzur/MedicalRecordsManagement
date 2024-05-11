@@ -1,3 +1,4 @@
+import json
 from flask import request
 from flask_restx import Resource, Namespace, fields
 from models.entry import Entry
@@ -5,20 +6,20 @@ from services.postgres_client import client
 
 api = Namespace('entries', description='Entry related operations')
 
-# Model definition for Swagger
 entry_model = api.model('Entry', {
     'patient_id': fields.Integer(required=True, description='The patient ID associated with this entry'),
     'record': fields.String(required=True, description='Details of the medical record'),
     'date_of_visit': fields.Date(required=True, description='Date of the visit'),
-    'time_of_visit': fields.String(description='Time of the visit'),
-    'visit_type': fields.String(required=True, description='Type of visit'),
-    'symptoms': fields.String(description='Symptoms presented by the patient'),
-    'diagnosis': fields.String(description='Diagnosis'),
-    'treatment': fields.String(description='Treatment prescribed'),
-    'prescribed_medications': fields.String(description='Medications prescribed'),
-    'follow_up_needed': fields.Boolean(description='Is follow-up needed?'),
-    'follow_up_date': fields.Date(description='Date for the follow-up'),
-    'notes': fields.String(description='Any additional notes'),
+    'time_of_visit': fields.String(description='Time of the visit', example="14:30"),
+    'visit_type': fields.String(required=True, description='Type of visit', example="Routine Check-up"),
+    'symptoms': fields.String(description='Symptoms presented by the patient', example="Headache, fever"),
+    'diagnosis': fields.String(description='Diagnosis', example="Common cold"),
+    'treatment': fields.String(description='Treatment prescribed', example="Rest and hydration"),
+    'prescribed_medications': fields.String(description='Medications prescribed', example="Paracetamol"),
+    'follow_up_needed': fields.Boolean(description='Is follow-up needed?', example=False),
+    'follow_up_date': fields.Date(description='Date for the follow-up', example="2024-06-15"),
+    'notes': fields.List(fields.String, description='Any additional notes', example=["summary", "Visit summary", "detail", "More detailed note"]),
+    'attached': fields.Raw(description='Attached files metadata', example={"filename": "report.pdf", "url": "http://example.com/report.pdf"})
 })
 
 @api.route('/')
@@ -41,7 +42,7 @@ class EntryList(Resource):
 @api.route('/<int:entry_id>')
 @api.param('entry_id', 'The unique identifier of the entry')
 @api.response(404, 'Entry not found')
-class Entry(Resource):
+class EntryResource(Resource):
     @api.doc('get_entry')
     @api.marshal_with(entry_model)
     def get(self, entry_id):
