@@ -7,6 +7,7 @@ api = Namespace('patients', description='Patient related operations')
 
 # Model definition for Swagger
 patient_model = api.model('Patient', {
+    'id': fields.Integer(readonly=True),
     'name': fields.String(required=True, description='Patient name'),
     'date_of_birth': fields.Date(required=True, description='Patient birth date'),
     'gender': fields.String(required=True, description='Patient gender'),
@@ -41,7 +42,7 @@ class PatientList(Resource):
 @api.route('/<int:patient_id>')
 @api.param('patient_id', 'The unique identifier of the patient')
 @api.response(404, 'Patient not found')
-class Patient(Resource):
+class PatientResource(Resource):
     @api.doc('get_patient')
     @api.marshal_with(patient_model)
     def get(self, patient_id):

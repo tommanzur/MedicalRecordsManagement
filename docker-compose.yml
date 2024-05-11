@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  flask_app:
+    container_name: flask_app
+    image: flask_image/flask_live_app:1.0.0
+    build: .
+    ports: 
+      - "4000:4000"
+    environment:
+      - DB_URL=postgresql://tu_usuario:tu_contraseña@flask_db:5432/medical_reports_db
+    depends_on:
+      - flask_db
+  
+  flask_db:
+    container_name: flask_db
+    image: postgres:12
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: medical_reports_db
+      POSTGRES_USER: tu_usuario
+      POSTGRES_PASSWORD: tu_contraseña
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data: {}
