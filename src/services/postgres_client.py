@@ -94,6 +94,14 @@ class PostgresClient:
         finally:
             session.close()
 
+    def get_entries_of_one_patient(self, patient_id):
+        session = self.Session()
+        try:
+            entries = session.query(Entry).filter(Entry.patient_id == patient_id).all()
+            return entries
+        finally:
+            session.close()
+
     def get_entry(self, entry_id):
         session = self.Session()
         try:
