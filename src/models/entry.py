@@ -1,5 +1,5 @@
-from models.patient import db
 from sqlalchemy.dialects.postgresql import JSONB
+from models import db
 
 class Entry(db.Model):
 

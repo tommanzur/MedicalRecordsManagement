@@ -1,47 +1,63 @@
-from flask import request
+import json
+from flask import jsonify, request
 from flask_restx import Resource, Namespace, fields
+from services.postgres_client import client as postgres_client
 
 api = Namespace('conversations', description='Conversations related operations')
 
 # Model definitions for Swagger
 conversation_model = api.model('Conversation', {
-    'title': fields.String(required=True, description='Conversation title'),
-    'description': fields.String(description='Conversation description'),
+    'id': fields.Integer(readOnly=True, description='Unique identifier of the conversation'),
+    'patient_id': fields.Integer(required=True, description='Patient ID'),
+    'start_time': fields.DateTime(required=True, description='Start time of the conversation', example='2024-05-11T12:00:00Z'),
+    'end_time': fields.DateTime(required=False, description='End time of the conversation', example='2024-05-11T13:00:00Z'),
+    'session_id': fields.String(required=True, description='Session UUID', example='123e4567-e89b-12d3-a456-426614174000'),
+    'messages': fields.Raw(required=False, description='JSONB field storing messages in JSON format')
 })
 
 message_model = api.model('Message', {
-    'conversation_id': fields.Integer(required=True, description='The ID of the conversation'),
-    'content': fields.String(required=True, description='Message content'),
+    'role': fields.String(required=True, description='Sender of the message', example='doctor'),
+    'content': fields.String(required=True, description='Content of the message', example='How are you feeling today?')
 })
+
 
 @api.route('/')
 class ConversationList(Resource):
     @api.doc('list_conversations')
+    @api.marshal_list_with(conversation_model)
     def get(self):
         """List all conversations"""
-        # Implementar lógica para retornar la lista de conversaciones
-        return {'message': 'List of conversations'}
+        conversations = postgres_client.get_all_conversations()
+        return conversations
 
     @api.doc('create_conversation')
     @api.expect(conversation_model)
+    @api.marshal_with(conversation_model, code=201)
     def post(self):
         """Create a new conversation"""
-        # Implementar lógica para crear una nueva conversación
-        return {'message': 'Conversation created'}, 201
+        data = request.json
+        new_conversation = postgres_client.add_conversation(patient_id=data['patient_id'], session_id=data['session_id'])
+        return new_conversation, 201
 
 @api.route('/<int:conv_id>')
 @api.param('conv_id', 'The unique identifier of the conversation')
 @api.response(404, 'Conversation not found')
-class Conversation(Resource):
+class ConversationResource(Resource):
     @api.doc('get_conversation')
+    @api.marshal_with(conversation_model)
     def get(self, conv_id):
         """Get a specific conversation"""
-        # Implementar lógica para retornar una conversación específica
-        return {'message': f'Conversation {conv_id}'}
+        conversation = postgres_client.get_conversation_by_id(conv_id)
+        if conversation is None:
+            api.abort(404, 'Conversation not found')
+        return conversation, 200
 
     @api.doc('post_message')
     @api.expect(message_model)
     def post(self, conv_id):
         """Post a message to a conversation"""
-        # Implementar lógica para postear un mensaje a una conversación específica
-        return {'message': f'Message to conversation {conv_id} posted'}, 201
+        content = request.json
+        conversation = postgres_client.add_message_to_conversation(conv_id=conv_id, message=json.dumps(content))
+        if conversation is None:
+            api.abort(404, 'Conversation not found')
+        return {'message': f'Message posted to conversation {conv_id}'}, 201

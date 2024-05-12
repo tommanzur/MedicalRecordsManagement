@@ -1,6 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-
-db = SQLAlchemy()
+from models import db
 
 class Patient(db.Model):
     __tablename__ = 'patient'
@@ -16,5 +15,5 @@ class Patient(db.Model):
     medical_record_number = db.Column(db.String(50))
     insurance_provider = db.Column(db.String(100))
     insurance_policy_number = db.Column(db.String(50))
-
+    conversations = db.relationship('Conversation', back_populates='patient', lazy=True)
     entries = db.relationship('Entry', backref='patient', lazy=True)
