@@ -67,3 +67,12 @@ class EntryResource(Resource):
         """Delete an entry"""
         client.delete_entry(entry_id)
         return {'success': True, 'message': 'Entry deleted'}, 200
+
+@api.route('/patient/<int:patient_id>')
+class PatientEntryList(Resource):
+    @api.doc('list_entries for one pacient')
+    @api.marshal_list_with(entry_model)
+    def get(self, patient_id):
+        """List all entries"""
+        entries = client.get_entries_of_one_patient(patient_id)
+        return entries
