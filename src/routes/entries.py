@@ -7,19 +7,20 @@ from services.postgres_client import client
 api = Namespace('entries', description='Entry related operations')
 
 entry_model = api.model('Entry', {
+    'id': fields.Integer(required=True, description='The entry ID'),
     'patient_id': fields.Integer(required=True, description='The patient ID associated with this entry'),
-    'record': fields.String(required=True, description='Details of the medical record'),
-    'date_of_visit': fields.Date(required=True, description='Date of the visit'),
-    'time_of_visit': fields.String(description='Time of the visit', example="14:30"),
+    'record': fields.String(required=False, description='Details of the medical record'),
+    'date_of_visit': fields.Date(required=False, description='Date of the visit'),
+    'time_of_visit': fields.String(required=False, description='Time of the visit', example="14:30"),
     'visit_type': fields.String(required=True, description='Type of visit', example="Routine Check-up"),
-    'symptoms': fields.String(description='Symptoms presented by the patient', example="Headache, fever"),
-    'diagnosis': fields.String(description='Diagnosis', example="Common cold"),
-    'treatment': fields.String(description='Treatment prescribed', example="Rest and hydration"),
-    'prescribed_medications': fields.String(description='Medications prescribed', example="Paracetamol"),
-    'follow_up_needed': fields.Boolean(description='Is follow-up needed?', example=False),
-    'follow_up_date': fields.Date(description='Date for the follow-up', example="2024-06-15"),
-    'notes': fields.List(fields.String, description='Any additional notes', example=["summary", "Visit summary", "detail", "More detailed note"]),
-    'attached': fields.Raw(description='Attached files metadata', example={"filename": "report.pdf", "url": "http://example.com/report.pdf"})
+    'symptoms': fields.String(required=False, description='Symptoms presented by the patient', example="Headache, fever"),
+    'diagnosis': fields.String(required=False, description='Diagnosis', example="Common cold"),
+    'treatment': fields.String(required=False, description='Treatment prescribed', example="Rest and hydration"),
+    'prescribed_medications': fields.String(required=False, description='Medications prescribed', example="Paracetamol"),
+    'follow_up_needed': fields.Boolean(required=False, description='Is follow-up needed?', example=False),
+    'follow_up_date': fields.Date(required=False, description='Date for the follow-up', example="2024-06-15"),
+    'notes': fields.String (required=False, description='Any additional notes', example=["summary", "Visit summary", "detail", "More detailed note"]),
+    'attached': fields.List(fields.String, required=False, description='Attached files metadata', example={"filename": "report.pdf", "url": "http://example.com/report.pdf"})
 })
 
 @api.route('/')
@@ -28,7 +29,8 @@ class EntryList(Resource):
     @api.marshal_list_with(entry_model)
     def get(self):
         """List all entries"""
-        return client.session.query(Entry).all()
+        entries = client.get_all_entries()
+        return entries
 
     @api.doc('create_entry')
     @api.expect(entry_model)
