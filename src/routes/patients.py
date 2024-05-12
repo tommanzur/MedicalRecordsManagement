@@ -27,8 +27,7 @@ class PatientList(Resource):
     @api.marshal_list_with(patient_model)
     def get(self):
         """List all patients"""
-        # Here you would implement the logic to retrieve all patients from the database
-        return client.session.query(Patient).all()
+        return client.get_all_patients()
 
     @api.doc('create_patient')
     @api.expect(patient_model)
