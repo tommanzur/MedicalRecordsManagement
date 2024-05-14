@@ -1,8 +1,7 @@
-import json
 from flask import request
 from flask_restx import Resource, Namespace, fields
-from models.entry import Entry
 from services.postgres_client import client
+from routes.auth import token_required
 
 api = Namespace('entries', description='Entry related operations')
 
@@ -27,6 +26,7 @@ entry_model = api.model('Entry', {
 class EntryList(Resource):
     @api.doc('list_entries')
     @api.marshal_list_with(entry_model)
+    @token_required
     def get(self):
         """List all entries"""
         entries = client.get_all_entries()
@@ -35,6 +35,7 @@ class EntryList(Resource):
     @api.doc('create_entry')
     @api.expect(entry_model)
     @api.marshal_with(entry_model, code=201)
+    @token_required
     def post(self):
         """Create a new entry"""
         data = request.json
@@ -47,6 +48,7 @@ class EntryList(Resource):
 class EntryResource(Resource):
     @api.doc('get_entry')
     @api.marshal_with(entry_model)
+    @token_required
     def get(self, entry_id):
         """Get data of a specific entry"""
         entry = client.get_entry(entry_id)
@@ -56,6 +58,7 @@ class EntryResource(Resource):
 
     @api.doc('update_entry')
     @api.expect(entry_model)
+    @token_required
     def put(self, entry_id):
         """Modify entry data"""
         data = request.json
@@ -63,6 +66,7 @@ class EntryResource(Resource):
         return {'success': True, 'message': 'Entry data updated'}, 200
 
     @api.doc('delete_entry')
+    @token_required
     def delete(self, entry_id):
         """Delete an entry"""
         client.delete_entry(entry_id)
@@ -72,6 +76,7 @@ class EntryResource(Resource):
 class PatientEntryList(Resource):
     @api.doc('list_entries for one pacient')
     @api.marshal_list_with(entry_model)
+    @token_required
     def get(self, patient_id):
         """List all entries"""
         entries = client.get_entries_of_one_patient(patient_id)
