@@ -1,11 +1,12 @@
 from flask import request
 from flask_restx import Resource, Namespace, fields
-from models.patient import Patient
 from services.postgres_client import client
+from flask_restx import Namespace, Resource
+from routes.auth import token_required
+
 
 api = Namespace('patients', description='Patient related operations')
 
-# Model definition for Swagger
 patient_model = api.model('Patient', {
     'id': fields.Integer(readonly=True),
     'name': fields.String(required=True, description='Patient name'),
@@ -21,17 +22,20 @@ patient_model = api.model('Patient', {
     'insurance_policy_number': fields.String(description='Insurance policy number'),
 })
 
+
 @api.route('/')
 class PatientList(Resource):
-    @api.doc('list_patients')
+    @api.doc('list_patients', security='Bearer Auth')
     @api.marshal_list_with(patient_model)
+    @token_required
     def get(self):
         """List all patients"""
         return client.get_all_patients()
 
-    @api.doc('create_patient')
+    @api.doc('create_patient', security='Bearer Auth')
     @api.expect(patient_model)
     @api.marshal_with(patient_model, code=201)
+    @token_required
     def post(self):
         """Create a new patient"""
         data = request.json
@@ -42,8 +46,9 @@ class PatientList(Resource):
 @api.param('patient_id', 'The unique identifier of the patient')
 @api.response(404, 'Patient not found')
 class PatientResource(Resource):
-    @api.doc('get_patient')
+    @api.doc('get_patient', security='Bearer Auth')
     @api.marshal_with(patient_model)
+    @token_required
     def get(self, patient_id):
         """Get data of a specific patient"""
         patient = client.get_patient(patient_id)
@@ -51,15 +56,17 @@ class PatientResource(Resource):
             return patient
         api.abort(404)
 
-    @api.doc('update_patient')
+    @api.doc('update_patient', security='Bearer Auth')
     @api.expect(patient_model)
+    @token_required
     def put(self, patient_id):
         """Modify patient data"""
         data = request.json
         client.update_patient(patient_id, **data)
         return {'success': True, 'message': 'Patient data updated'}, 200
 
-    @api.doc('delete_patient')
+    @api.doc('delete_patient', security='Bearer Auth')
+    @token_required
     def delete(self, patient_id):
         """Delete a patient"""
         client.delete_patient(patient_id)

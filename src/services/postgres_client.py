@@ -1,12 +1,15 @@
 import json
 import os
+import bcrypt
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from models import db
 from models.patient import Patient
 from models.entry import Entry
+from models.users import User 
 from models.conversations import Conversation
+from services.conversation_service import process_chatbot_response, start_conversation
 
 class PostgresClient:
     def __init__(self):
@@ -18,7 +21,6 @@ class PostgresClient:
         self.Session = scoped_session(self.session_factory)
 
     def init_db(self):
-        db.metadata.create_all(self.engine)
         db.metadata.create_all(self.engine)
 
     def add_patient(self, **kwargs):
@@ -160,9 +162,8 @@ class PostgresClient:
     def add_conversation(self, patient_id, session_id):
         session = self.Session()
         try:
-            new_conversation = Conversation(patient_id=patient_id, session_id=session_id)
-            session.add(new_conversation)
-            session.commit()
+            patient_entries = client.get_entries_of_one_patient(patient_id)
+            start_conversation(session=session, patient_id=patient_id, session_id=session_id, patient_entries=patient_entries)
             return {'message': 'Conversation created'}
         except SQLAlchemyError as e:
             session.rollback()
@@ -193,28 +194,77 @@ class PostgresClient:
         finally:
             session.close()
 
-    def add_message_to_conversation(self, conv_id, message):
-        """Añade un mensaje a una conversación existente."""
+    def add_message_to_conversation(self, conv_id, message_content):
         session = self.Session()
         try:
             conversation = session.query(Conversation).get(conv_id)
-            if conversation:
-                current_messages = conversation.messages
-                if isinstance(current_messages, str):
-                    current_messages = json.loads(conversation.messages) if conversation.messages else []
-                if message:
-                    current_messages.append(message)
-                    setattr(conversation, "messages", current_messages)
-                    session.commit()
-                    return conversation
+            if not conversation:
+                return None
 
+            user_message = {'role': 'user', 'content': message_content}
+            conversation.messages.append(json.dumps(user_message))
+            response = process_chatbot_response(conversation.messages)
+            ai_message = {'role': 'bot', 'content': response}
+            conversation.messages.append(json.dumps(ai_message))
+
+            session.commit()
+            return response
         except SQLAlchemyError as e:
-            print(f"SQLAlchemy Error: {e}")
             session.rollback()
             raise
         finally:
             session.close()
 
+    def add_user(self, username, password):
+        session = self.Session()
+        try:
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            new_user = User(username=username, password=hashed_password.decode('utf-8'))
+            session.add(new_user)
+            session.commit()
+            return new_user.id
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+            
+    def get_user_by_username(self, username):
+        session = self.Session()
+        try:
+            user = session.query(User).filter(User.username == username).first()
+            return user
+        finally:
+            session.close()
+
+    def delete_user(self, user_id):
+        session = self.Session()
+        try:
+            user = session.query(User).get(user_id)
+            if user:
+                session.delete(user)
+                session.commit()
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
+    def update_user_password(self, username, new_password):
+        session = self.Session()
+        try:
+            user = session.query(User).filter_by(username=username).first()
+            if user:
+                hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+                user.password = hashed_password
+                session.commit()
+                return True
+            return False
+        except SQLAlchemyError as e:
+            session.rollback()
+            raise
+        finally:
+            session.close()
 
 client = PostgresClient()
 client.init_db()
