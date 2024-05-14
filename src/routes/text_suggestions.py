@@ -1,5 +1,6 @@
 from flask import request
 from flask_restx import Resource, Namespace, fields
+from routes.auth import token_required
 
 api = Namespace('text-suggestions', description='Text Suggestions related operations')
 
@@ -11,9 +12,10 @@ text_suggestion_model = api.model('TextSuggestion', {
 
 @api.route('/')
 class TextSuggestionList(Resource):
-    @api.doc('create_text_suggestion')
+    @api.doc('create_text_suggestion', security='Bearer Auth')
     @api.expect(text_suggestion_model, validate=True)
     @api.marshal_with(text_suggestion_model, code=201)
+    @token_required
     def post(self):
         """Process input text and provide suggestions"""
         # Here we gonna implement the logic for text processing and suggestion generation

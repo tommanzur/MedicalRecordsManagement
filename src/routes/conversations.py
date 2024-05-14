@@ -1,7 +1,7 @@
-import json
-from flask import jsonify, request
+from flask import request
 from flask_restx import Resource, Namespace, fields
 from services.postgres_client import client as postgres_client
+from routes.auth import token_required
 
 api = Namespace('conversations', description='Conversations related operations')
 
@@ -25,6 +25,7 @@ message_model = api.model('Message', {
 class ConversationList(Resource):
     @api.doc('list_conversations')
     @api.marshal_list_with(conversation_model)
+    @token_required
     def get(self):
         """List all conversations"""
         conversations = postgres_client.get_all_conversations()
@@ -33,6 +34,7 @@ class ConversationList(Resource):
     @api.doc('create_conversation')
     @api.expect(conversation_model)
     @api.marshal_with(conversation_model, code=201)
+    @token_required
     def post(self):
         """Create a new conversation"""
         data = request.json
@@ -45,6 +47,7 @@ class ConversationList(Resource):
 class ConversationResource(Resource):
     @api.doc('get_conversation')
     @api.marshal_with(conversation_model)
+    @token_required
     def get(self, conv_id):
         """Get a specific conversation"""
         conversation = postgres_client.get_conversation_by_id(conv_id)
@@ -54,10 +57,12 @@ class ConversationResource(Resource):
 
     @api.doc('post_message')
     @api.expect(message_model)
+    @token_required
     def post(self, conv_id):
         """Post a message to a conversation"""
-        content = request.json
-        conversation = postgres_client.add_message_to_conversation(conv_id=conv_id, message=json.dumps(content))
-        if conversation is None:
-            api.abort(404, 'Conversation not found')
-        return {'message': f'Message posted to conversation {conv_id}'}, 201
+        content = request.json['content']
+        try:
+            response = postgres_client.add_message_to_conversation(conv_id, content)
+            return {'message': 'Message and response added to conversation', 'response': response}, 201
+        except Exception as e:
+            api.abort(404, 'Conversation not found or error in processing: ' + str(e))
