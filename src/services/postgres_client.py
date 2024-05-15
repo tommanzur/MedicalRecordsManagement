@@ -5,6 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from models import db
+from models.note import Note
 from models.patient import Patient
 from models.entry import Entry
 from models.users import User 
@@ -83,9 +84,6 @@ class PostgresClient:
     def add_entry(self, **kwargs):
         session = self.Session()
         try:
-            if 'notes' in kwargs and kwargs['notes'] is not None:
-                if not isinstance(kwargs['notes'], list):
-                    kwargs['notes'] = [kwargs['notes']]
             new_entry = Entry(**kwargs)
             session.add(new_entry)
             session.commit()
@@ -130,15 +128,7 @@ class PostgresClient:
             entry = session.query(Entry).get(entry_id)
             if entry:
                 for key, value in kwargs.items():
-                    if key == 'notes':
-                        current_notes = entry.notes
-                        if isinstance(current_notes, str):
-                            current_notes = json.loads(current_notes) if current_notes else []
-                        if value:
-                            current_notes.append(value)
-                        setattr(entry, key, current_notes)
-                    else:
-                        setattr(entry, key, value)
+                    setattr(entry, key, value)
                 session.commit()
         except SQLAlchemyError as e:
             session.rollback()
@@ -146,6 +136,20 @@ class PostgresClient:
         finally:
             session.close()
 
+    def add_note_to_entry(self, entry_id, text):
+        session = self.Session()
+        try:
+            note = Note(entry_id=entry_id, text=text)
+            session.add(note)
+            session.commit()
+            return True
+        except SQLAlchemyError as e:
+            session.rollback()
+            print(f"Failed to add note: {e}")
+            return False
+        finally:
+            session.close()
+            
     def delete_entry(self, entry_id):
         session = self.Session()
         try:

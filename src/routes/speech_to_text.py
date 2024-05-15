@@ -29,7 +29,7 @@ file_upload.add_argument(
 
 @api.route("/<int:entry_id>")
 class SpeechToText(Resource):
-    @api.doc('speach_to_text', security='Bearer Auth')
+    @api.doc('speech_to_text', security='Bearer Auth')
     @api.expect(file_upload)
     @api.response(200, "Success")
     @api.response(400, "Bad Request")
@@ -40,11 +40,17 @@ class SpeechToText(Resource):
         args = file_upload.parse_args(strict=True)
         audio_file = args["audio"]
 
+        # Transcribe the audio file to text
         transcription = transcribe_audio(audio_file)
 
+        # Check if the entry exists
         entry = client.get_entry(entry_id)
         if entry:
-            client.update_entry(entry_id, notes=transcription)
-            return {'success': True, 'message': 'Note added successfully'}, 200
+            # Add the transcription as a new note to the entry
+            success = client.add_note_to_entry(entry_id, transcription)
+            if success:
+                return {'success': True, 'message': 'Note added successfully'}, 200
+            else:
+                return {'success': False, 'message': 'Failed to add note'}, 400
         else:
             api.abort(404, "Entry not found")
