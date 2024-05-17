@@ -1,19 +1,11 @@
-import os
-import tempfile
 from services.openai_client import openai_client
 
-def transcribe_audio(audio_file):
-    # Create a temporary file to store the audio
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        audio_file.save(temp_file.name)  # Save the FileStorage object to the temp file
-        try:
-            with open(temp_file.name, 'rb') as file:
-                transcription = openai_client.audio.transcriptions.create(
-                    file=file, model="whisper-1", language="es"
-                    )
-            return transcription['text']
-        finally:
-            os.unlink(temp_file.name)
+def transcribe_audio(audio_bytes, filename):
+    response = openai_client.audio.transcriptions.create(
+        file=(filename, audio_bytes),
+        model="whisper-1"
+    )
+    return response.text
 
 def resume_speech(transcription):
     abstract_summary = abstract_summary_extraction(transcription)
