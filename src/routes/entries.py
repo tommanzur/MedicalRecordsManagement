@@ -32,13 +32,12 @@ class EntryList(Resource):
 
     @api.doc('create_entry')
     @api.expect(entry_model)
-    @api.marshal_with(entry_model, code=201)
     @token_required
     def post(self):
         """Create a new entry"""
         data = request.json
         entry_id = client.add_entry(**data)
-        return client.get_entry(entry_id), 201
+        return f"Entry {entry_id} added", 201
 
 @api.route('/<int:entry_id>')
 @api.param('entry_id', 'The unique identifier of the entry')

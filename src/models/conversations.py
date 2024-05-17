@@ -7,12 +7,12 @@ from sqlalchemy.ext.mutable import MutableList
 
 class Conversation(db.Model):
     __tablename__ = 'conversation'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     patient_id = db.Column(db.Integer, db.ForeignKey('patient.id'), nullable=False)
     start_time = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     end_time = db.Column(db.DateTime, nullable=True)
     session_id = db.Column(db.String(36), nullable=False)
-    messages = db.Column(MutableList.as_mutable(JSON) , nullable=True, default=[])
+    messages = db.Column(MutableList.as_mutable(JSONB), nullable=True, default=[])
     
     patient = db.relationship('Patient', back_populates='conversations')
 
@@ -20,6 +20,5 @@ class Conversation(db.Model):
         super(Conversation, self).__init__(*args, **kwargs)
         self.patient_id = patient_id
         self.session_id = session_id
-        if messages is None:
+        if not messages:
             self.messages = []
-

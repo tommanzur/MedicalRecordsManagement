@@ -8,7 +8,6 @@ from routes.auth import token_required
 api = Namespace('patients', description='Patient related operations')
 
 patient_model = api.model('Patient', {
-    'id': fields.Integer(readonly=True),
     'name': fields.String(required=True, description='Patient name'),
     'date_of_birth': fields.Date(required=True, description='Patient birth date'),
     'gender': fields.String(required=True, description='Patient gender'),

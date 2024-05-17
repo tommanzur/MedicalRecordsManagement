@@ -1,4 +1,4 @@
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON
 from models import db
 
 class Entry(db.Model):
@@ -16,6 +16,6 @@ class Entry(db.Model):
     prescribed_medications = db.Column(db.Text, nullable=True)
     follow_up_needed = db.Column(db.Boolean, nullable=True)
     follow_up_date = db.Column(db.Date, nullable=True)
-    attached = db.Column(JSONB, nullable=True)
+    attached = db.Column(JSON, nullable=True)
 
     notes = db.relationship('Note', back_populates='entry', cascade='all, delete-orphan')

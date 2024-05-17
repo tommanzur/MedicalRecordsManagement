@@ -7,7 +7,6 @@ api = Namespace('conversations', description='Conversations related operations')
 
 # Model definitions for Swagger
 conversation_model = api.model('Conversation', {
-    'id': fields.Integer(readOnly=True, description='Unique identifier of the conversation'),
     'patient_id': fields.Integer(required=True, description='Patient ID'),
     'start_time': fields.DateTime(required=True, description='Start time of the conversation', example='2024-05-11T12:00:00Z'),
     'end_time': fields.DateTime(required=False, description='End time of the conversation', example='2024-05-11T13:00:00Z'),
@@ -33,13 +32,12 @@ class ConversationList(Resource):
 
     @api.doc('create_conversation')
     @api.expect(conversation_model)
-    @api.marshal_with(conversation_model, code=201)
     @token_required
     def post(self):
         """Create a new conversation"""
         data = request.json
         new_conversation = postgres_client.add_conversation(patient_id=data['patient_id'], session_id=data['session_id'])
-        return new_conversation, 201
+        return new_conversation.get('message'), 201
 
 @api.route('/<int:conv_id>')
 @api.param('conv_id', 'The unique identifier of the conversation')
@@ -62,7 +60,8 @@ class ConversationResource(Resource):
         """Post a message to a conversation"""
         content = request.json['content']
         try:
-            response = postgres_client.add_message_to_conversation(conv_id, content)
+            patient_id = postgres_client.get_conversation_by_id(conv_id).patient_id
+            response = postgres_client.add_message_to_conversation(conv_id=conv_id, message_content=content, patient_id=patient_id)
             return {'message': 'Message and response added to conversation', 'response': response}, 201
         except Exception as e:
             api.abort(404, 'Conversation not found or error in processing: ' + str(e))
