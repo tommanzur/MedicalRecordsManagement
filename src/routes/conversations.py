@@ -7,6 +7,7 @@ api = Namespace('conversations', description='Conversations related operations')
 
 # Model definitions for Swagger
 conversation_model = api.model('Conversation', {
+    'id': fields.Integer(required=True, description='Conversation ID'),
     'patient_id': fields.Integer(required=True, description='Patient ID'),
     'start_time': fields.DateTime(required=True, description='Start time of the conversation', example='2024-05-11T12:00:00Z'),
     'end_time': fields.DateTime(required=False, description='End time of the conversation', example='2024-05-11T13:00:00Z'),

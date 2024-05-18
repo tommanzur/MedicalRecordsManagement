@@ -1,305 +1,907 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Patient Management API</title>
-  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</head>
-<body>
-  <div class="container">
-    <h1 class="mt-5">Patient Management API</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Patient Management API</title>
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="mt-5">Patient Management API</h1>
 
-    <!-- Authentication Form -->
-    <div id="authForm" class="mt-3">
-      <h3>Login</h3>
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" class="form-control" id="username" required>
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" class="form-control" id="password" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Login</button>
-      </form>
-    </div>
+      <!-- Authentication Form -->
+      <div id="authForm" class="mt-3">
+        <h3>Login</h3>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" required />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+      </div>
 
-    <!-- Patient Management with Tabs -->
-    <div id="patientManagement" class="mt-3" style="display:none;">
-      <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item">
-          <a class="nav-link active" id="fetch-patients-tab" data-toggle="tab" href="#fetch-patients" role="tab" aria-controls="fetch-patients" aria-selected="true">Fetch Patients</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="add-patient-tab" data-toggle="tab" href="#add-patient" role="tab" aria-controls="add-patient" aria-selected="false">Add Patient</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="fetch-entries-tab" data-toggle="tab" href="#fetch-entries" role="tab" aria-controls="fetch-entries" aria-selected="false">Fetch Entries</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="add-entry-tab" data-toggle="tab" href="#add-entry" role="tab" aria-controls="add-entry" aria-selected="false">Add Entry</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="add-voice-note-tab" data-toggle="tab" href="#add-voice-note" role="tab" aria-controls="add-voice-note" aria-selected="false">Add Voice Note</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="fetch-conversations-tab" data-toggle="tab" href="#fetch-conversations" role="tab" aria-controls="fetch-conversations" aria-selected="false">Fetch Conversations</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="add-conversation-tab" data-toggle="tab" href="#add-conversation" role="tab" aria-controls="add-conversation" aria-selected="false">Add Conversation</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" id="chat-tab" data-toggle="tab" href="#chat" role="tab" aria-controls="chat" aria-selected="false">Chat</a>
-        </li>
-      </ul>
-      <div class="tab-content" id="myTabContent">
-        <div class="tab-pane fade show active" id="fetch-patients" role="tabpanel" aria-labelledby="fetch-patients-tab">
-          <h3>Patients</h3>
-          <button class="btn btn-primary mb-3" onclick="listPatients()">List All Patients</button>
-          <table class="table table-bordered" id="patientsTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Date of Birth</th>
-                <th>Gender</th>
-                <th>Address</th>
-                <th>Phone Number</th>
-                <th>Email</th>
-                <th>Emergency Contact Name</th>
-                <th>Emergency Contact Phone</th>
-                <th>Medical Record Number</th>
-                <th>Insurance Provider</th>
-                <th>Insurance Policy Number</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="tab-pane fade" id="add-patient" role="tabpanel" aria-labelledby="add-patient-tab">
-          <h4>Add New Patient</h4>
-          <form id="addPatientForm" class="mt-3">
-            <div class="form-group">
-              <label for="patientName">Name</label>
-              <input type="text" class="form-control" id="patientName" required>
+      <!-- Patient Management with Tabs -->
+      <div id="patientManagement" class="mt-3" style="display: none">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item">
+            <a
+              class="nav-link active"
+              id="fetch-patients-tab"
+              data-toggle="tab"
+              href="#fetch-patients"
+              role="tab"
+              aria-controls="fetch-patients"
+              aria-selected="true"
+              >Fetch Patients</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              id="add-patient-tab"
+              data-toggle="tab"
+              href="#add-patient"
+              role="tab"
+              aria-controls="add-patient"
+              aria-selected="false"
+              >Manage Patients</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              id="fetch-entries-tab"
+              data-toggle="tab"
+              href="#fetch-entries"
+              role="tab"
+              aria-controls="fetch-entries"
+              aria-selected="false"
+              >Fetch Entries</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              id="add-entry-tab"
+              data-toggle="tab"
+              href="#add-entry"
+              role="tab"
+              aria-controls="add-entry"
+              aria-selected="false"
+              >Manage Entries</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              id="add-voice-note-tab"
+              data-toggle="tab"
+              href="#add-voice-note"
+              role="tab"
+              aria-controls="add-voice-note"
+              aria-selected="false"
+              >Add Voice Note</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              id="manage-conversations-tab"
+              data-toggle="tab"
+              href="#manage-conversations"
+              role="tab"
+              aria-controls="manage-conversations"
+              aria-selected="false"
+              >Manage Conversations</a
+            >
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              id="chat-tab"
+              data-toggle="tab"
+              href="#chat"
+              role="tab"
+              aria-controls="chat"
+              aria-selected="false"
+              >Chat</a
+            >
+          </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+          <style>
+            #patientsTable {
+              font-size: 0.875rem; /* Reduce the font size */
+            }
+            #fetch-patients .container {
+              max-width: 100%; /* Ensure the container takes the full width of the screen */
+            }
+          </style>
+
+          <div
+            class="tab-pane fade show active"
+            id="fetch-patients"
+            role="tabpanel"
+            aria-labelledby="fetch-patients-tab"
+          >
+            <div class="container-fluid mt-4">
+              <h3>Patients</h3>
+              <button class="btn btn-primary mb-3" onclick="listPatients()">
+                List All Patients
+              </button>
+              <div class="table-responsive">
+                <table
+                  class="table table-striped table-bordered table-hover"
+                  id="patientsTable"
+                >
+                  <thead class="thead-dark">
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Date of Birth</th>
+                      <th>Gender</th>
+                      <th>Address</th>
+                      <th>Phone Number</th>
+                      <th>Email</th>
+                      <th>Emergency Contact Name</th>
+                      <th>Emergency Contact Phone</th>
+                      <th>Medical Record Number</th>
+                      <th>Insurance Provider</th>
+                      <th>Insurance Policy Number</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="dateOfBirth">Date of Birth</label>
-              <input type="date" class="form-control" id="dateOfBirth" required>
-            </div>
-            <div class="form-group">
-              <label for="gender">Gender</label>
-              <input type="text" class="form-control" id="gender" required>
-            </div>
-            <div class="form-group">
-              <label for="address">Address</label>
-              <input type="text" class="form-control" id="address" required>
-            </div>
-            <div class="form-group">
-              <label for="phoneNumber">Phone Number</label>
-              <input type="text" class="form-control" id="phoneNumber" required>
-            </div>
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" class="form-control" id="email" required>
-            </div>
-            <div class="form-group">
-              <label for="emergencyContactName">Emergency Contact Name</label>
-              <input type="text" class="form-control" id="emergencyContactName" required>
-            </div>
-            <div class="form-group">
-              <label for="emergencyContactPhone">Emergency Contact Phone</label>
-              <input type="text" class="form-control" id="emergencyContactPhone" required>
-            </div>
-            <div class="form-group">
-              <label for="medicalRecordNumber">Medical Record Number</label>
-              <input type="text" class="form-control" id="medicalRecordNumber" required>
-            </div>
-            <div class="form-group">
-              <label for="insuranceProvider">Insurance Provider</label>
-              <input type="text" class="form-control" id="insuranceProvider" required>
-            </div>
-            <div class="form-group">
-              <label for="insurancePolicyNumber">Insurance Policy Number</label>
-              <input type="text" class="form-control" id="insurancePolicyNumber" required>
-            </div>
-            <button type="submit" class="btn btn-success">Add Patient</button>
-          </form>
-        </div>
-        <div class="tab-pane fade" id="fetch-entries" role="tabpanel" aria-labelledby="fetch-entries-tab">
-          <h3>Clinical Entries</h3>
-          <div class="form-group">
-            <label for="entryPatientId">Patient ID</label>
-            <input type="number" class="form-control" id="entryPatientId" required>
-            <button class="btn btn-primary mt-3" onclick="listEntries()">List Entries</button>
           </div>
-          <table class="table table-bordered" id="entriesTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Patient ID</th>
-                <th>Date of Visit</th>
-                <th>Time of Visit</th>
-                <th>Visit Type</th>
-                <th>Symptoms</th>
-                <th>Diagnosis</th>
-                <th>Treatment</th>
-                <th>Prescribed Medications</th>
-                <th>Follow-up Date</th>
-                <th>Attached</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="tab-pane fade" id="add-entry" role="tabpanel" aria-labelledby="add-entry-tab">
-          <h4>Add New Entry</h4>
-          <form id="addEntryForm" class="mt-3">
-            <div class="form-group">
-              <label for="entryPatientIdInput">Patient ID</label>
-              <input type="number" class="form-control" id="entryPatientIdInput" required>
+          <div
+            class="tab-pane fade"
+            id="add-patient"
+            role="tabpanel"
+            aria-labelledby="add-patient-tab"
+          >
+            <h4 class="mt-4">Manage Patient</h4>
+            <div class="px-5">
+              <form id="patientForm" class="mt-3">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="patientName">Name</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="patientName"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="dateOfBirth">Date of Birth</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="dateOfBirth"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="gender">Gender</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="gender"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="address">Address</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="address"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="phoneNumber">Phone Number</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="phoneNumber"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="email">Email</label>
+                      <input
+                        type="email"
+                        class="form-control"
+                        id="email"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="emergencyContactName"
+                        >Emergency Contact Name</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="emergencyContactName"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="emergencyContactPhone"
+                        >Emergency Contact Phone</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="emergencyContactPhone"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="medicalRecordNumber"
+                        >Medical Record Number</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="medicalRecordNumber"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="insuranceProvider">Insurance Provider</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="insuranceProvider"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="insurancePolicyNumber"
+                        >Insurance Policy Number</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="insurancePolicyNumber"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="patientId">Patient ID</label>
+                      <input type="text" class="form-control" id="patientId" />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <button type="submit" class="btn btn-success mt-3">
+                      Add Patient
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-primary mt-3 ml-3"
+                      id="updatePatientButton"
+                    >
+                      Update Patient
+                    </button>
+                  </div>
+                  <div class="col-md-6 text-right">
+                    <button
+                      type="button"
+                      class="btn btn-danger mt-3"
+                      id="deletePatientButton"
+                    >
+                      Delete Patient
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
-            <div class="form-group">
-              <label for="entryDateOfVisit">Date of Visit</label>
-              <input type="date" class="form-control" id="entryDateOfVisit">
-            </div>
-            <div class="form-group">
-              <label for="entryTimeOfVisit">Time of Visit</label>
-              <input type="time" class="form-control" id="entryTimeOfVisit">
-            </div>
-            <div class="form-group">
-              <label for="entryVisitType">Visit Type</label>
-              <input type="text" class="form-control" id="entryVisitType">
-            </div>
-            <div class="form-group">
-              <label for="entrySymptoms">Symptoms</label>
-              <textarea class="form-control" id="entrySymptoms"></textarea>
-            </div>
-            <div class="form-group">
-              <label for="entryDiagnosis">Diagnosis</label>
-              <textarea class="form-control" id="entryDiagnosis"></textarea>
-            </div>
-            <div class="form-group">
-              <label for="entryTreatment">Treatment</label>
-              <textarea class="form-control" id="entryTreatment"></textarea>
-            </div>
-            <div class="form-group">
-              <label for="entryPrescribedMedications">Prescribed Medications</label>
-              <textarea class="form-control" id="entryPrescribedMedications"></textarea>
-            </div>
-            <div class="form-group">
-              <label for="entryFollowUpDate">Follow-up Date</label>
-              <input type="date" class="form-control" id="entryFollowUpDate">
-            </div>
-            <button type="submit" class="btn btn-success">Add Entry</button>
-          </form>
-        </div>
-        <div class="tab-pane fade" id="fetch-conversations" role="tabpanel" aria-labelledby="fetch-conversations-tab">
-          <h3>Conversations</h3>
-          <div class="form-group">
-            <label for="conversationPatientId">Patient ID</label>
-            <input type="number" class="form-control" id="conversationPatientId" required>
-            <button class="btn btn-primary mt-3" onclick="listConversations()">List Conversations</button>
           </div>
-          <table class="table table-bordered" id="conversationsTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Patient ID</th>
-                <th>Session ID</th>
-                <th>Created At</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="tab-pane fade" id="add-conversation" role="tabpanel" aria-labelledby="add-conversation-tab">
-          <h4>Add New Conversation</h4>
-          <form id="addConversationForm" class="mt-3">
-            <div class="form-group">
-              <label for="newConversationPatientId">Patient ID</label>
-              <input type="number" class="form-control" id="newConversationPatientId" required>
+
+          <style>
+            #entriesTable {
+              font-size: 0.875rem; /* Reduce the font size */
+            }
+            #fetch-entries .container {
+              max-width: 100%; /* Ensure the container takes the full width of the screen */
+            }
+          </style>
+
+          <div
+            class="tab-pane fade"
+            id="fetch-entries"
+            role="tabpanel"
+            aria-labelledby="fetch-entries-tab"
+          >
+            <div class="container-fluid mt-4">
+              <h3>Clinical Entries</h3>
+              <div class="form-group">
+                <label for="entryPatientId">Patient ID</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="entryPatientId"
+                  required
+                />
+                <button class="btn btn-primary mt-3" onclick="listEntries()">
+                  List Entries
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table
+                  class="table table-striped table-bordered table-hover"
+                  id="entriesTable"
+                >
+                  <thead class="thead-dark">
+                    <tr>
+                      <th>ID</th>
+                      <th>Patient ID</th>
+                      <th>Date of Visit</th>
+                      <th>Time of Visit</th>
+                      <th>Visit Type</th>
+                      <th>Symptoms</th>
+                      <th>Diagnosis</th>
+                      <th>Treatment</th>
+                      <th>Prescribed Medications</th>
+                      <th>Follow-up Date</th>
+                      <th>Attached</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="sessionId">Session ID</label>
-              <input type="text" class="form-control" id="sessionId" required>
-            </div>
-            <button type="submit" class="btn btn-success">Add Conversation</button>
-          </form>
-        </div>
-        <div class="tab-pane fade" id="add-voice-note" role="tabpanel" aria-labelledby="add-voice-note-tab">
-          <h4>Upload Audio</h4>
-          <form id="uploadAudioForm" class="mt-3" enctype="multipart/form-data">
-            <div class="form-group">
-              <label for="audioEntryId">Entry ID</label>
-              <input type="number" class="form-control" id="audioEntryId" required>
-            </div>
-            <div class="form-group">
-              <label for="audioFile">Audio File</label>
-              <input type="file" class="form-control" id="audioFile" accept="audio/*" required>
-            </div>
-            <button type="submit" class="btn btn-success">Upload Audio</button>
-          </form>
-        </div>
-        <div class="tab-pane fade" id="chat" role="tabpanel" aria-labelledby="chat-tab">
-          <h4>Chat with AI</h4>
-          <div class="form-group">
-            <label for="chatPatientId">Conversation ID</label>
-            <input type="number" class="form-control" id="chatPatientId" required>
           </div>
-          <div id="chatBox" class="border p-3 mb-3" style="height: 200px; overflow-y: scroll;">
-            <!-- Messages will be displayed here -->
-          </div>
-          <form id="chatForm" class="mt-3">
-            <div class="form-group">
-              <input type="text" class="form-control" id="chatMessage" placeholder="Type your message here..." required>
+
+          <div
+            class="tab-pane fade"
+            id="add-entry"
+            role="tabpanel"
+            aria-labelledby="add-entry-tab"
+          >
+            <h4 class="mt-4">Manage Entry</h4>
+            <div class="px-5">
+              <form id="entryForm" class="mt-3">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="entryPatientIdInput">Patient ID</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        id="entryPatientIdInput"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="entryDateOfVisit">Date of Visit</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="entryDateOfVisit"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="entryTimeOfVisit">Time of Visit</label>
+                      <input
+                        type="time"
+                        class="form-control"
+                        id="entryTimeOfVisit"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="entryVisitType">Visit Type</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="entryVisitType"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="entrySymptoms">Symptoms</label>
+                      <textarea
+                        class="form-control"
+                        id="entrySymptoms"
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="entryDiagnosis">Diagnosis</label>
+                      <textarea
+                        class="form-control"
+                        id="entryDiagnosis"
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="entryTreatment">Treatment</label>
+                      <textarea
+                        class="form-control"
+                        id="entryTreatment"
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="entryPrescribedMedications"
+                        >Prescribed Medications</label
+                      >
+                      <textarea
+                        class="form-control"
+                        id="entryPrescribedMedications"
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="entryFollowUpDate">Follow-up Date</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="entryFollowUpDate"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="entryId">Entry ID</label>
+                      <input type="text" class="form-control" id="entryId" />
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <button type="submit" class="btn btn-success mt-3">
+                      Add Entry
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-primary mt-3 ml-3"
+                      id="updateEntryButton"
+                    >
+                      Update Entry
+                    </button>
+                  </div>
+                  <div class="col-md-6 text-right">
+                    <button
+                      type="button"
+                      class="btn btn-danger mt-3"
+                      id="deleteEntryButton"
+                    >
+                      Delete Entry
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
-            <button type="submit" class="btn btn-primary">Send</button>
-          </form>
+          </div>
+
+          <div
+            class="tab-pane fade"
+            id="manage-conversations"
+            role="tabpanel"
+            aria-labelledby="manage-conversations-tab"
+          >
+            <h4 class="mt-4">Manage Conversations</h4>
+            <form id="addConversationForm" class="mt-3">
+              <div class="form-group">
+                <label for="newConversationPatientId">Patient ID</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="newConversationPatientId"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="sessionId">Session ID</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="sessionId"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-success">
+                Add Conversation
+              </button>
+            </form>
+
+            <div class="form-group mt-3">
+              <button
+                class="btn btn-primary mt-3"
+                onclick="listConversations()"
+              >
+                List Conversations
+              </button>
+            </div>
+            <div class="container-fluid mt-4">
+              <h3>Conversations</h3>
+              <div class="table-responsive">
+                <table
+                  class="table table-striped table-bordered table-hover"
+                  id="conversationsTable"
+                >
+                  <thead class="thead-dark">
+                    <tr>
+                      <th>ID</th>
+                      <th>Patient ID</th>
+                      <th>Session ID</th>
+                      <th>Created At</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Voice Note Tab -->
+          <div
+            class="tab-pane fade"
+            id="add-voice-note"
+            role="tabpanel"
+            aria-labelledby="add-voice-note-tab"
+          >
+            <h4 class="mt-4">Record Voice Note</h4>
+            <form id="voiceNoteForm" class="mt-3">
+              <div class="form-group">
+                <label for="audioEntryId">Entry ID</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="audioEntryId"
+                  required
+                />
+              </div>
+              <button type="button" id="recordButton" class="btn btn-success">
+                Record
+              </button>
+            </form>
+          </div>
+          <style>
+            #chatBox {
+              height: 300px; /* Increased height for better visibility */
+              overflow-y: scroll;
+              background-color: #f8f9fa; /* Light background for better readability */
+              border-radius: 5px; /* Rounded corners */
+            }
+            #chatForm input {
+              border-radius: 20px; /* Rounded input field */
+            }
+            #chatForm button {
+              border-radius: 20px; /* Rounded button */
+            }
+            .chat-message {
+              margin-bottom: 10px; /* Space between messages */
+            }
+            .chat-message.user {
+              text-align: right; /* Align user messages to the right */
+            }
+            .chat-message.ai {
+              text-align: left; /* Align AI messages to the left */
+            }
+          </style>
+
+          <div
+            class="tab-pane fade"
+            id="chat"
+            role="tabpanel"
+            aria-labelledby="chat-tab"
+          >
+            <div class="container-fluid mt-4">
+              <h4>Chat with AI</h4>
+              <div class="form-group">
+                <label for="chatPatientId">Conversation ID</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="chatPatientId"
+                  required
+                />
+              </div>
+              <div id="chatBox" class="border p-3 mb-3">
+                <!-- Messages will be displayed here -->
+              </div>
+              <form id="chatForm" class="mt-3">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="chatMessage"
+                    placeholder="Type your message here..."
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary">Send</button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script>
-    const API_URL = 'http://127.0.0.1:5000'; // Replace with your API URL
+    <script>
+      const API_URL = "http://127.0.0.1:5000"; // Replace with your API URL
 
-    // Function to handle login form submission
-    $('#loginForm').submit(function(event) {
-      event.preventDefault();
-      const username = $('#username').val();
-      const password = $('#password').val();
-      $.ajax({
-        type: 'POST',
-        url: `${API_URL}/auth/login`,
-        data: JSON.stringify({ username: username, password: password }),
-        contentType: 'application/json',
-        success: function(response) {
-          localStorage.setItem('token', response.token);
-          $('#authForm').hide();
-          $('#patientManagement').show();
-        },
-        error: function() {
-          alert('Login failed!');
-        }
+      // Function to handle login form submission
+      $("#loginForm").submit(function (event) {
+        event.preventDefault();
+        const username = $("#username").val();
+        const password = $("#password").val();
+        $.ajax({
+          type: "POST",
+          url: `${API_URL}/auth/login`,
+          data: JSON.stringify({ username: username, password: password }),
+          contentType: "application/json",
+          success: function (response) {
+            localStorage.setItem("token", response.token);
+            $("#authForm").hide();
+            $("#patientManagement").show();
+          },
+          error: function () {
+            alert("Login failed!");
+          },
+        });
       });
-    });
 
-    // Function to list all patients
-    function listPatients() {
-      const token = localStorage.getItem('token');
-      $.ajax({
-        type: 'GET',
-        url: `${API_URL}/patients/`,
-        headers: { 'Authorization': `${token}` },
-        success: function(data) {
-          $('#patientsTable tbody').empty();
-          data.forEach(patient => {
-            $('#patientsTable tbody').append(`
+      // Function to delete an entry
+      document
+        .getElementById("deleteEntryButton")
+        .addEventListener("click", async function () {
+          const entryId = document.getElementById("entryId").value;
+          if (!entryId) {
+            alert("Please enter an Entry ID to delete");
+            return;
+          }
+
+          try {
+            const response = await fetch(`${API_URL}/entries/${entryId}`, {
+              method: "DELETE",
+              headers: {
+                Authorization: `${localStorage.getItem("token")}`,
+              },
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              alert(result.message);
+              document.getElementById("entryForm").reset();
+            } else {
+              const error = await response.json();
+              alert(`Error: ${error.message}`);
+            }
+          } catch (error) {
+            alert(`Error: ${error.message}`);
+          }
+        });
+
+      // Function to update a patient
+      document
+        .getElementById("updatePatientButton")
+        .addEventListener("click", async function () {
+          const patientId = document.getElementById("patientId").value;
+          if (!patientId) {
+            alert("Please enter a Patient ID to update");
+            return;
+          }
+
+          const data = {
+            name: document.getElementById("patientName").value,
+            dateOfBirth: document.getElementById("dateOfBirth").value,
+            gender: document.getElementById("gender").value,
+            address: document.getElementById("address").value,
+            phoneNumber: document.getElementById("phoneNumber").value,
+            email: document.getElementById("email").value,
+            emergencyContactName: document.getElementById(
+              "emergencyContactName"
+            ).value,
+            emergencyContactPhone: document.getElementById(
+              "emergencyContactPhone"
+            ).value,
+            medicalRecordNumber: document.getElementById("medicalRecordNumber")
+              .value,
+            insuranceProvider:
+              document.getElementById("insuranceProvider").value,
+            insurancePolicyNumber: document.getElementById(
+              "insurancePolicyNumber"
+            ).value,
+          };
+
+          try {
+            const response = await fetch(`${API_URL}/patients/${patientId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `${localStorage.getItem("token")}`,
+              },
+              body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              alert(result.message);
+            } else {
+              const error = await response.json();
+              alert(`Error: ${error.message}`);
+            }
+          } catch (error) {
+            alert(`Error: ${error.message}`);
+          }
+        });
+
+      // Function to delete a patient
+      document
+        .getElementById("deletePatientButton")
+        .addEventListener("click", async function () {
+          const patientId = document.getElementById("patientId").value;
+          if (!patientId) {
+            alert("Please enter a Patient ID to delete");
+            return;
+          }
+
+          try {
+            const response = await fetch(`${API_URL}/patients/${patientId}`, {
+              method: "DELETE",
+              headers: {
+                Authorization: `${localStorage.getItem("token")}`,
+              },
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              alert(result.message);
+              document.getElementById("patientForm").reset();
+            } else {
+              const error = await response.json();
+              alert(`Error: ${error.message}`);
+            }
+          } catch (error) {
+            alert(`Error: ${error.message}`);
+          }
+        });
+
+      // Function to update an entry
+      document
+        .getElementById("updateEntryButton")
+        .addEventListener("click", async function () {
+          const entryId = document.getElementById("entryId").value;
+          if (!entryId) {
+            alert("Please enter an Entry ID to update");
+            return;
+          }
+
+          const Data = {};
+          // Always include patient_id
+          Data.patient_id = $("#entryPatientIdInput").val();
+
+          // Add optional fields only if they have values
+          const dateOfVisit = $("#entryDateOfVisit").val();
+          if (dateOfVisit) Data.date_of_visit = dateOfVisit;
+
+          const timeOfVisit = $("#entryTimeOfVisit").val();
+          if (timeOfVisit) Data.time_of_visit = timeOfVisit;
+
+          const visitType = $("#entryVisitType").val();
+          if (visitType) Data.visit_type = visitType;
+
+          const symptoms = $("#entrySymptoms").val();
+          if (symptoms) Data.symptoms = symptoms;
+
+          const diagnosis = $("#entryDiagnosis").val();
+          if (diagnosis) Data.diagnosis = diagnosis;
+
+          const treatment = $("#entryTreatment").val();
+          if (treatment) Data.treatment = treatment;
+
+          const prescribedMedications = $("#entryPrescribedMedications").val();
+          if (prescribedMedications)
+            Data.prescribed_medications = prescribedMedications;
+
+          const followUpDate = $("#entryFollowUpDate").val();
+          if (followUpDate) Data.follow_up_date = followUpDate;
+
+          try {
+            const response = await fetch(`${API_URL}/entries/${entryId}`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `${localStorage.getItem("token")}`,
+              },
+              body: JSON.stringify(data),
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              alert(result.message);
+            } else {
+              const error = await response.json();
+              alert(`Error: ${error.message}`);
+            }
+          } catch (error) {
+            alert(`Error: ${error.message}`);
+          }
+        });
+
+      // Function to list all patients
+      function listPatients() {
+        const token = localStorage.getItem("token");
+        $.ajax({
+          type: "GET",
+          url: `${API_URL}/patients/`,
+          headers: { Authorization: `${token}` },
+          success: function (data) {
+            $("#patientsTable tbody").empty();
+            data.forEach((patient) => {
+              $("#patientsTable tbody").append(`
               <tr>
                 <td>${patient.id}</td>
                 <td>${patient.name}</td>
@@ -315,26 +917,26 @@
                 <td>${patient.insurance_policy_number}</td>
               </tr>
             `);
-          });
-        },
-        error: function() {
-          alert('Failed to fetch patients!');
-        }
-      });
-    }
+            });
+          },
+          error: function () {
+            alert("Failed to fetch patients!");
+          },
+        });
+      }
 
-    // Function to list entries for a specific patient
-    function listEntries() {
-      const token = localStorage.getItem('token');
-      const patientId = $('#entryPatientId').val();
-      $.ajax({
-        type: 'GET',
-        url: `${API_URL}/entries/patient/${patientId}`,
-        headers: { 'Authorization': `${token}` },
-        success: function(data) {
-          $('#entriesTable tbody').empty();
-          data.forEach(entry => {
-            $('#entriesTable tbody').append(`
+      // Function to list entries for a specific patient
+      function listEntries() {
+        const token = localStorage.getItem("token");
+        const patientId = $("#entryPatientId").val();
+        $.ajax({
+          type: "GET",
+          url: `${API_URL}/entries/patient/${patientId}`,
+          headers: { Authorization: `${token}` },
+          success: function (data) {
+            $("#entriesTable tbody").empty();
+            data.forEach((entry) => {
+              $("#entriesTable tbody").append(`
               <tr>
                 <td>${entry.id}</td>
                 <td>${entry.patient_id}</td>
@@ -348,225 +950,282 @@
                 <td>${entry.follow_up_date}</td>
               </tr>
             `);
-          });
-        },
-        error: function() {
-          alert('Failed to fetch entries!');
-        }
-      });
-    }
+            });
+          },
+          error: function () {
+            alert("Failed to fetch entries!");
+          },
+        });
+      }
 
-    // Function to list conversations for a specific patient
-    function listConversations() {
-      const token = localStorage.getItem('token');
-      const patientId = $('#conversationPatientId').val();
-      $.ajax({
-        type: 'GET',
-        url: `${API_URL}/conversations/${patientId}`,
-        headers: { 'Authorization': `${token}` },
-        success: function(data) {
-          $('#conversationsTable tbody').empty();
-          data.forEach(conversation => {
-            $('#conversationsTable tbody').append(`
+      // Function to list conversations
+      function listConversations() {
+        const token = localStorage.getItem("token");
+        $.ajax({
+          type: "GET",
+          url: `${API_URL}/conversations/`,
+          headers: { Authorization: `${token}` },
+          success: function (data) {
+            $("#conversationsTable tbody").empty();
+            data.forEach((conversation) => {
+              $("#conversationsTable tbody").append(`
               <tr>
                 <td>${conversation.id}</td>
                 <td>${conversation.patient_id}</td>
                 <td>${conversation.session_id}</td>
-                <td>${conversation.created_at}</td>
+                <td>${conversation.start_time}</td>
               </tr>
             `);
-          });
-        },
-        error: function() {
-          alert('Failed to fetch conversations!');
-        }
-      });
-    }
-
-    // Add new patient form submission
-    $('#addPatientForm').submit(function(event) {
-      event.preventDefault();
-      const token = localStorage.getItem('token');
-      const patientData = {
-        name: $('#patientName').val(),
-        date_of_birth: $('#dateOfBirth').val(),
-        gender: $('#gender').val(),
-        address: $('#address').val(),
-        phone_number: $('#phoneNumber').val(),
-        email: $('#email').val(),
-        emergency_contact_name: $('#emergencyContactName').val(),
-        emergency_contact_phone: $('#emergencyContactPhone').val(),
-        medical_record_number: $('#medicalRecordNumber').val(),
-        insurance_provider: $('#insuranceProvider').val(),
-        insurance_policy_number: $('#insurancePolicyNumber').val()
-      };
-      $.ajax({
-        type: 'POST',
-        url: `${API_URL}/patients/`,
-        headers: { 'Authorization': `${token}` },
-        data: JSON.stringify(patientData),
-        contentType: 'application/json',
-        success: function() {
-          listPatients();
-          $('#addPatientForm')[0].reset();
-        },
-        error: function() {
-          alert('Failed to add patient!');
-        }
-      });
-    });
-
-    // Add new entry form submission
-    $('#addEntryForm').submit(function(event) {
-    event.preventDefault();
-    const token = localStorage.getItem('token');
-    const entryData = {};
-
-    // Always include patient_id
-    entryData.patient_id = $('#entryPatientIdInput').val();
-
-    // Add optional fields only if they have values
-    const dateOfVisit = $('#entryDateOfVisit').val();
-    if (dateOfVisit) entryData.date_of_visit = dateOfVisit;
-
-    const timeOfVisit = $('#entryTimeOfVisit').val();
-    if (timeOfVisit) entryData.time_of_visit = timeOfVisit;
-
-    const visitType = $('#entryVisitType').val();
-    if (visitType) entryData.visit_type = visitType;
-
-    const symptoms = $('#entrySymptoms').val();
-    if (symptoms) entryData.symptoms = symptoms;
-
-    const diagnosis = $('#entryDiagnosis').val();
-    if (diagnosis) entryData.diagnosis = diagnosis;
-
-    const treatment = $('#entryTreatment').val();
-    if (treatment) entryData.treatment = treatment;
-
-    const prescribedMedications = $('#entryPrescribedMedications').val();
-    if (prescribedMedications) entryData.prescribed_medications = prescribedMedications;
-
-    const followUpDate = $('#entryFollowUpDate').val();
-    if (followUpDate) entryData.follow_up_date = followUpDate;
-
-    $.ajax({
-      type: 'POST',
-      url: `${API_URL}/entries/`,
-      headers: { 'Authorization': `${token}` },
-      data: JSON.stringify(entryData),
-      contentType: 'application/json',
-      success: function() {
-        const patientId = $('#entryPatientIdInput').val();
-        $('#entryPatientId').val(patientId);
-        listEntries();
-        $('#addEntryForm')[0].reset();
-      },
-      error: function(xhr, status, error) {
-        console.error('Error details:', xhr.responseText);
-        alert('Failed to add entry! ' + xhr.responseText);
+            });
+          },
+          error: function () {
+            alert("Failed to fetch conversations!");
+          },
+        });
       }
-    });
-  });
 
-    // Add new conversation form submission
-    $('#addConversationForm').submit(function(event) {
-      event.preventDefault();
-      const token = localStorage.getItem('token');
-      const conversationData = {
-        patient_id: $('#newConversationPatientId').val(),
-        session_id: $('#sessionId').val()
-      };
-      $.ajax({
-        type: 'POST',
-        url: `${API_URL}/conversations`,
-        headers: { 'Authorization': `${token}` },
-        data: JSON.stringify(conversationData),
-        contentType: 'application/json',
-        success: function() {
-          listConversations();
-          $('#addConversationForm')[0].reset();
-        },
-        error: function() {
-          alert('Failed to add conversation!');
-        }
+      // Add new patient form submission
+      $("#patientForm").submit(function (event) {
+        event.preventDefault();
+        const token = localStorage.getItem("token");
+        const patientData = {
+          name: $("#patientName").val(),
+          date_of_birth: $("#dateOfBirth").val(),
+          gender: $("#gender").val(),
+          address: $("#address").val(),
+          phone_number: $("#phoneNumber").val(),
+          email: $("#email").val(),
+          emergency_contact_name: $("#emergencyContactName").val(),
+          emergency_contact_phone: $("#emergencyContactPhone").val(),
+          medical_record_number: $("#medicalRecordNumber").val(),
+          insurance_provider: $("#insuranceProvider").val(),
+          insurance_policy_number: $("#insurancePolicyNumber").val(),
+        };
+        $.ajax({
+          type: "POST",
+          url: `${API_URL}/patients/`,
+          headers: { Authorization: `${token}` },
+          data: JSON.stringify(patientData),
+          contentType: "application/json",
+          success: function () {
+            listPatients();
+            $("#patientForm")[0].reset();
+          },
+          error: function () {
+            alert("Failed to add patient!");
+          },
+        });
       });
-    });
 
-    // Upload audio form submission
-    $('#uploadAudioForm').submit(function(event) {
-      event.preventDefault();
-      const token = localStorage.getItem('token');
-      const entryId = $('#audioEntryId').val();
-      const formData = new FormData();
-      formData.append('audio', $('#audioFile')[0].files[0]);
+      // Add new entry form submission
+      $("#entryForm").submit(function (event) {
+        event.preventDefault();
+        const token = localStorage.getItem("token");
+        const entryData = {};
+        // Always include patient_id
+        entryData.patient_id = $("#entryPatientIdInput").val();
 
-      $.ajax({
-        type: 'POST',
-        url: `${API_URL}/speech_to_text/${entryId}`,
-        headers: { 'Authorization': `${token}` },
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function() {
-          alert('Audio uploaded successfully!');
-        },
-        error: function() {
-          alert('Failed to upload audio!');
-        }
+        // Add optional fields only if they have values
+        const dateOfVisit = $("#entryDateOfVisit").val();
+        if (dateOfVisit) entryData.date_of_visit = dateOfVisit;
+
+        const timeOfVisit = $("#entryTimeOfVisit").val();
+        if (timeOfVisit) entryData.time_of_visit = timeOfVisit;
+
+        const visitType = $("#entryVisitType").val();
+        if (visitType) entryData.visit_type = visitType;
+
+        const symptoms = $("#entrySymptoms").val();
+        if (symptoms) entryData.symptoms = symptoms;
+
+        const diagnosis = $("#entryDiagnosis").val();
+        if (diagnosis) entryData.diagnosis = diagnosis;
+
+        const treatment = $("#entryTreatment").val();
+        if (treatment) entryData.treatment = treatment;
+
+        const prescribedMedications = $("#entryPrescribedMedications").val();
+        if (prescribedMedications)
+          entryData.prescribed_medications = prescribedMedications;
+
+        const followUpDate = $("#entryFollowUpDate").val();
+        if (followUpDate) entryData.follow_up_date = followUpDate;
+
+        $.ajax({
+          type: "POST",
+          url: `${API_URL}/entries/`,
+          headers: { Authorization: `${token}` },
+          data: JSON.stringify(entryData),
+          contentType: "application/json",
+          success: function () {
+            listEntries();
+            $("#entryForm")[0].reset();
+          },
+          error: function () {
+            alert("Failed to add entry!");
+          },
+        });
       });
-    });
 
-    // Chat form submission
-    $('#chatForm').submit(function(event) {
-      event.preventDefault();
-      const token = localStorage.getItem('token');
-      const patientId = $('#chatPatientId').val();
-      const message = $('#chatMessage').val();
-      const conversationId = $('#chatPatientId').val(); // Replace with the actual conversation ID
+      // Add new conversation form submission
+      $("#addConversationForm").submit(function (event) {
+        event.preventDefault();
+        const token = localStorage.getItem("token");
+        const conversationData = {
+          patient_id: $("#newConversationPatientId").val(),
+          session_id: $("#sessionId").val(),
+        };
+        $.ajax({
+          type: "POST",
+          url: `${API_URL}/conversations`,
+          headers: { Authorization: `${token}` },
+          data: JSON.stringify(conversationData),
+          contentType: "application/json",
+          success: function () {
+            listConversations();
+            $("#addConversationForm")[0].reset();
+          },
+          error: function () {
+            alert("Failed to add conversation!");
+          },
+        });
+      });
 
-      // Render the user's message first
-      $('#chatBox').append(`<div><strong>You:</strong> ${message}</div>`);
+      // Function to handle voice note recording
+      let mediaRecorder;
+      let audioChunks = [];
 
-      // Create a container for the AI's response
-      const aiMessageContainer = $('<div><strong>AI:</strong> <span class="ai-response"></span></div>');
-      $('#chatBox').append(aiMessageContainer);
+      // Function to handle voice note recording
+      $("#recordButton").click(async function () {
+        const button = $(this);
 
-      // Send the message to the server
-      fetch(`${API_URL}/conversations/${conversationId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ content: message })
-      })
-      .then(response => {
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder('utf-8');
-        let aiResponse = '';
-
-        function readStream() {
-          return reader.read().then(({ done, value }) => {
-            if (done) {
-              return;
-            }
-            const chunk = decoder.decode(value, { stream: true });
-            aiResponse += chunk;
-            aiMessageContainer.find('.ai-response').text(aiResponse);
-            return readStream();
+        if (button.hasClass("btn-success")) {
+          // Start recording
+          button
+            .removeClass("btn-success")
+            .addClass("btn-danger")
+            .text("Recording...");
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
           });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks = []; // Clear previous chunks
+          mediaRecorder.start();
+          mediaRecorder.ondataavailable = function (event) {
+            if (event.data.size > 0) {
+              audioChunks.push(event.data);
+            }
+          };
+        } else if (button.hasClass("btn-danger")) {
+          // Stop recording
+          mediaRecorder.stop();
+          button
+            .removeClass("btn-danger")
+            .addClass("btn-warning")
+            .text("Sending...");
+
+          mediaRecorder.onstop = async function () {
+            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+            const formData = new FormData();
+            formData.append("audio", audioBlob, "recording.wav");
+
+            console.log("Audio Blob:", audioBlob);
+            console.log("Form Data:", formData.get("audio"));
+
+            const entryId = $("#audioEntryId").val();
+
+            try {
+              const response = await fetch(
+                `${API_URL}/speech_to_text/${entryId}`,
+                {
+                  method: "POST",
+                  headers: {
+                    Authorization: `${localStorage.getItem("token")}`,
+                  },
+                  body: formData,
+                }
+              );
+
+              if (response.ok) {
+                const responseData = await response.json();
+                console.log(responseData);
+                button
+                  .removeClass("btn-warning")
+                  .addClass("btn-success")
+                  .text("Record");
+                alert("Audio uploaded successfully!");
+              } else {
+                const errorText = await response.text();
+                console.error("Error details:", errorText);
+                button
+                  .removeClass("btn-warning")
+                  .addClass("btn-success")
+                  .text("Record");
+                alert("Failed to upload audio! " + errorText);
+              }
+            } catch (error) {
+              console.error("Fetch error:", error);
+              button
+                .removeClass("btn-warning")
+                .addClass("btn-success")
+                .text("Record");
+              alert("Failed to upload audio! " + error.message);
+            }
+          };
         }
-        
-        return readStream();
-      })
-      .catch(error => {
-        alert('Failed to send message!');
-        console.error(error);
       });
 
-      $('#chatMessage').val('');
-    });
-  </script>
-</body>
+      // Chat form submission
+      $("#chatForm").submit(function (event) {
+        event.preventDefault();
+        const token = localStorage.getItem("token");
+        const conversationId = $("#chatPatientId").val();
+        const message = $("#chatMessage").val();
+
+        // Render the user's message first
+        $("#chatBox").append(`<div><strong>You:</strong> ${message}</div>`);
+
+        // Create a container for the AI's response
+        const aiMessageContainer = $(
+          '<div><strong>AI:</strong> <span class="ai-response"></span></div>'
+        );
+        $("#chatBox").append(aiMessageContainer);
+
+        // Send the message to the server
+        fetch(`${API_URL}/conversations/${conversationId}`, {
+          method: "POST",
+          headers: {
+            Authorization: `${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ content: message }),
+        })
+          .then((response) => {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let aiResponse = "";
+
+            function readStream() {
+              return reader.read().then(({ done, value }) => {
+                if (done) {
+                  return;
+                }
+                const chunk = decoder.decode(value, { stream: true });
+                aiResponse += chunk;
+                aiMessageContainer.find(".ai-response").text(aiResponse);
+                return readStream();
+              });
+            }
+
+            return readStream();
+          })
+          .catch((error) => {
+            alert("Failed to send message!");
+            console.error(error);
+          });
+
+        $("#chatMessage").val("");
+      });
+    </script>
+  </body>
 </html>

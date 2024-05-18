@@ -4,7 +4,6 @@ from datetime import datetime
 from models import db
 from sqlalchemy.ext.mutable import MutableList
 
-
 class Conversation(db.Model):
     __tablename__ = 'conversation'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
