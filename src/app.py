@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask
+from flask import Flask, render_template
 from flask_restx import Api
 from routes.patients import api as patients_ns
 from routes.entries import api as entries_ns
@@ -29,6 +29,10 @@ api.add_namespace(text_suggestions_ns, path='/text-suggestions')
 api.add_namespace(conversations_ns, path='/conversations')
 api.add_namespace(auth_ns, path='/auth')
 api.add_namespace(admin_ns, path='/admin')
+
+@app.route('/ui')
+def ui():
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

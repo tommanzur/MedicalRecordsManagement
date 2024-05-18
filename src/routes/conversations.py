@@ -1,7 +1,7 @@
-from flask import request
 from flask_restx import Resource, Namespace, fields
 from services.postgres_client import client as postgres_client
 from routes.auth import token_required
+from flask import stream_with_context, request, Response
 
 api = Namespace('conversations', description='Conversations related operations')
 
@@ -58,10 +58,27 @@ class ConversationResource(Resource):
     @token_required
     def post(self, conv_id):
         """Post a message to a conversation"""
-        content = request.json['content']
-        try:
-            patient_id = postgres_client.get_conversation_by_id(conv_id).patient_id
-            response = postgres_client.add_message_to_conversation(conv_id=conv_id, message_content=content, patient_id=patient_id)
-            return {'message': 'Message and response added to conversation', 'response': response}, 201
-        except Exception as e:
-            api.abort(404, 'Conversation not found or error in processing: ' + str(e))
+        content = request.json.get('content', '')
+
+        @stream_with_context
+        def generate():
+            try:
+                # Obtiene la conversación por su ID
+                conversation = postgres_client.get_conversation_by_id(conv_id)
+                if not conversation:
+                    yield "Error: Conversation not found\n"
+                    return
+                
+                # Obtiene el ID del paciente asociado a la conversación
+                patient_id = conversation.patient_id
+                
+                # Añade el mensaje a la conversación
+                response = postgres_client.add_message_to_conversation(conv_id=conv_id, message_content=content, patient_id=patient_id)
+                
+                # Genera la respuesta en forma de stream
+                for word in str(response):
+                    yield word
+            except Exception as e:
+                yield f"Error: {str(e)}\n"
+
+        return Response(generate(), content_type='text/plain')
