@@ -216,7 +216,7 @@ class PostgresClient:
         """Obtiene una lista de todas las conversaciones."""
         session = self.Session()
         try:
-            conversation = session.query(Conversation)
+            conversation = session.query(Conversation).all()
             return conversation
         except SQLAlchemyError as e:
             session.rollback()
