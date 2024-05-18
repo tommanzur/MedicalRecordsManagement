@@ -231,18 +231,15 @@
             <button type="submit" class="btn btn-success">Add Conversation</button>
           </form>
         </div>
+        <!-- Add Voice Note Tab -->
         <div class="tab-pane fade" id="add-voice-note" role="tabpanel" aria-labelledby="add-voice-note-tab">
-          <h4>Upload Audio</h4>
-          <form id="uploadAudioForm" class="mt-3" enctype="multipart/form-data">
+          <h4>Record Voice Note</h4>
+          <form id="voiceNoteForm" class="mt-3">
             <div class="form-group">
               <label for="audioEntryId">Entry ID</label>
               <input type="number" class="form-control" id="audioEntryId" required>
             </div>
-            <div class="form-group">
-              <label for="audioFile">Audio File</label>
-              <input type="file" class="form-control" id="audioFile" accept="audio/*" required>
-            </div>
-            <button type="submit" class="btn btn-success">Upload Audio</button>
+            <button type="button" id="recordButton" class="btn btn-success">Record</button>
           </form>
         </div>
         <div class="tab-pane fade" id="chat" role="tabpanel" aria-labelledby="chat-tab">
@@ -288,6 +285,71 @@
         }
       });
     });
+
+let mediaRecorder;
+let audioChunks = [];
+
+// Function to handle voice note recording
+$('#recordButton').click(async function() {
+  const button = $(this);
+
+  if (button.hasClass('btn-success')) {
+    // Start recording
+    button.removeClass('btn-success').addClass('btn-danger').text('Recording...');
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = []; // Clear previous chunks
+    mediaRecorder.start();
+    mediaRecorder.ondataavailable = function(event) {
+      if (event.data.size > 0) {
+        audioChunks.push(event.data);
+      }
+    };
+
+  } else if (button.hasClass('btn-danger')) {
+    // Stop recording
+    mediaRecorder.stop();
+    button.removeClass('btn-danger').addClass('btn-warning').text('Sending...');
+
+    mediaRecorder.onstop = async function() {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.wav');
+
+      console.log('Audio Blob:', audioBlob);
+      console.log('Form Data:', formData.get('audio'));
+
+      const entryId = $('#audioEntryId').val();
+
+      try {
+        const response = await fetch(`${API_URL}/speech_to_text/${entryId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `${localStorage.getItem('token')}`
+          },
+          body: formData
+        });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          console.log(responseData);
+          button.removeClass('btn-warning').addClass('btn-success').text('Record');
+          alert('Audio uploaded successfully!');
+        } else {
+          const errorText = await response.text();
+          console.error('Error details:', errorText);
+          button.removeClass('btn-warning').addClass('btn-success').text('Record');
+          alert('Failed to upload audio! ' + errorText);
+        }
+      } catch (error) {
+        console.error('Fetch error:', error);
+        button.removeClass('btn-warning').addClass('btn-success').text('Record');
+        alert('Failed to upload audio! ' + error.message);
+      }
+    };
+  }
+});
+
 
     // Function to list all patients
     function listPatients() {
