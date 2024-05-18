@@ -142,7 +142,6 @@
               <tr>
                 <th>ID</th>
                 <th>Patient ID</th>
-                <th>Record</th>
                 <th>Date of Visit</th>
                 <th>Time of Visit</th>
                 <th>Visit Type</th>
@@ -150,7 +149,6 @@
                 <th>Diagnosis</th>
                 <th>Treatment</th>
                 <th>Prescribed Medications</th>
-                <th>Follow-up Needed</th>
                 <th>Follow-up Date</th>
                 <th>Attached</th>
               </tr>
@@ -166,12 +164,8 @@
               <input type="number" class="form-control" id="entryPatientIdInput" required>
             </div>
             <div class="form-group">
-              <label for="entryRecord">Record</label>
-              <textarea class="form-control" id="entryRecord" required></textarea>
-            </div>
-            <div class="form-group">
               <label for="entryDateOfVisit">Date of Visit</label>
-              <input type="date" class="form-control" id="entryDateOfVisit" required>
+              <input type="date" class="form-control" id="entryDateOfVisit">
             </div>
             <div class="form-group">
               <label for="entryTimeOfVisit">Time of Visit</label>
@@ -179,7 +173,7 @@
             </div>
             <div class="form-group">
               <label for="entryVisitType">Visit Type</label>
-              <input type="text" class="form-control" id="entryVisitType" required>
+              <input type="text" class="form-control" id="entryVisitType">
             </div>
             <div class="form-group">
               <label for="entrySymptoms">Symptoms</label>
@@ -198,16 +192,8 @@
               <textarea class="form-control" id="entryPrescribedMedications"></textarea>
             </div>
             <div class="form-group">
-              <label for="entryFollowUpNeeded">Follow-up Needed</label>
-              <input type="checkbox" id="entryFollowUpNeeded">
-            </div>
-            <div class="form-group">
               <label for="entryFollowUpDate">Follow-up Date</label>
               <input type="date" class="form-control" id="entryFollowUpDate">
-            </div>
-            <div class="form-group">
-              <label for="entryAttached">Attached</label>
-              <textarea class="form-control" id="entryAttached"></textarea>
             </div>
             <button type="submit" class="btn btn-success">Add Entry</button>
           </form>
@@ -352,7 +338,6 @@
               <tr>
                 <td>${entry.id}</td>
                 <td>${entry.patient_id}</td>
-                <td>${entry.record}</td>
                 <td>${entry.date_of_visit}</td>
                 <td>${entry.time_of_visit}</td>
                 <td>${entry.visit_type}</td>
@@ -360,9 +345,7 @@
                 <td>${entry.diagnosis}</td>
                 <td>${entry.treatment}</td>
                 <td>${entry.prescribed_medications}</td>
-                <td>${entry.follow_up_needed}</td>
                 <td>${entry.follow_up_date}</td>
-                <td>${entry.attached}</td>
               </tr>
             `);
           });
@@ -435,39 +418,56 @@
 
     // Add new entry form submission
     $('#addEntryForm').submit(function(event) {
-      event.preventDefault();
-      const token = localStorage.getItem('token');
-      const entryData = {
-        patient_id: $('#entryPatientIdInput').val(),
-        record: $('#entryRecord').val(),
-        date_of_visit: $('#entryDateOfVisit').val(),
-        time_of_visit: $('#entryTimeOfVisit').val(),
-        visit_type: $('#entryVisitType').val(),
-        symptoms: $('#entrySymptoms').val(),
-        diagnosis: $('#entryDiagnosis').val(),
-        treatment: $('#entryTreatment').val(),
-        prescribed_medications: $('#entryPrescribedMedications').val(),
-        follow_up_needed: $('#entryFollowUpNeeded').is(':checked'),
-        follow_up_date: $('#entryFollowUpDate').val(),
-        attached: $('#entryAttached').val()
-      };
-      $.ajax({
-        type: 'POST',
-        url: `${API_URL}/entries/`,
-        headers: { 'Authorization': `${token}` },
-        data: JSON.stringify(entryData),
-        contentType: 'application/json',
-        success: function() {
-          const patientId = $('#entryPatientIdInput').val();
-          $('#entryPatientId').val(patientId);
-          listEntries();
-          $('#addEntryForm')[0].reset();
-        },
-        error: function() {
-          alert('Failed to add entry!');
-        }
-      });
+    event.preventDefault();
+    const token = localStorage.getItem('token');
+    const entryData = {};
+
+    // Always include patient_id
+    entryData.patient_id = $('#entryPatientIdInput').val();
+
+    // Add optional fields only if they have values
+    const dateOfVisit = $('#entryDateOfVisit').val();
+    if (dateOfVisit) entryData.date_of_visit = dateOfVisit;
+
+    const timeOfVisit = $('#entryTimeOfVisit').val();
+    if (timeOfVisit) entryData.time_of_visit = timeOfVisit;
+
+    const visitType = $('#entryVisitType').val();
+    if (visitType) entryData.visit_type = visitType;
+
+    const symptoms = $('#entrySymptoms').val();
+    if (symptoms) entryData.symptoms = symptoms;
+
+    const diagnosis = $('#entryDiagnosis').val();
+    if (diagnosis) entryData.diagnosis = diagnosis;
+
+    const treatment = $('#entryTreatment').val();
+    if (treatment) entryData.treatment = treatment;
+
+    const prescribedMedications = $('#entryPrescribedMedications').val();
+    if (prescribedMedications) entryData.prescribed_medications = prescribedMedications;
+
+    const followUpDate = $('#entryFollowUpDate').val();
+    if (followUpDate) entryData.follow_up_date = followUpDate;
+
+    $.ajax({
+      type: 'POST',
+      url: `${API_URL}/entries/`,
+      headers: { 'Authorization': `${token}` },
+      data: JSON.stringify(entryData),
+      contentType: 'application/json',
+      success: function() {
+        const patientId = $('#entryPatientIdInput').val();
+        $('#entryPatientId').val(patientId);
+        listEntries();
+        $('#addEntryForm')[0].reset();
+      },
+      error: function(xhr, status, error) {
+        console.error('Error details:', xhr.responseText);
+        alert('Failed to add entry! ' + xhr.responseText);
+      }
     });
+  });
 
     // Add new conversation form submission
     $('#addConversationForm').submit(function(event) {
@@ -523,7 +523,7 @@
       const token = localStorage.getItem('token');
       const patientId = $('#chatPatientId').val();
       const message = $('#chatMessage').val();
-      const conversationId = 3; // Replace with the actual conversation ID
+      const conversationId = $('#chatPatientId').val(); // Replace with the actual conversation ID
 
       // Render the user's message first
       $('#chatBox').append(`<div><strong>You:</strong> ${message}</div>`);
