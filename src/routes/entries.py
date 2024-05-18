@@ -6,6 +6,7 @@ from routes.auth import token_required
 api = Namespace('entries', description='Entry related operations')
 
 entry_model = api.model('Entry', {
+    'id': fields.Integer(required=False, description='The entry ID'),
     'patient_id': fields.Integer(required=True, description='The patient ID associated with this entry'),
     'record': fields.String(required=False, description='Details of the medical record'),
     'date_of_visit': fields.Date(required=False, description='Date of the visit'),
