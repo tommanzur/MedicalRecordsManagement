@@ -6,11 +6,11 @@ from routes.auth import token_required
 api = Namespace('entries', description='Entry related operations')
 
 entry_model = api.model('Entry', {
+    'id': fields.Integer(required=False, description='The entry ID'),
     'patient_id': fields.Integer(required=True, description='The patient ID associated with this entry'),
-    'record': fields.String(required=False, description='Details of the medical record'),
     'date_of_visit': fields.Date(required=False, description='Date of the visit'),
     'time_of_visit': fields.String(required=False, description='Time of the visit', example="14:30"),
-    'visit_type': fields.String(required=True, description='Type of visit', example="Routine Check-up"),
+    'visit_type': fields.String(required=False, description='Type of visit', example="Routine Check-up"),
     'symptoms': fields.String(required=False, description='Symptoms presented by the patient', example="Headache, fever"),
     'diagnosis': fields.String(required=False, description='Diagnosis', example="Common cold"),
     'treatment': fields.String(required=False, description='Treatment prescribed', example="Rest and hydration"),

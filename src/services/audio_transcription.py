@@ -1,4 +1,5 @@
 from services.openai_client import openai_client
+import json
 
 def transcribe_audio(audio_bytes, filename):
     response = openai_client.audio.transcriptions.create(
@@ -7,64 +8,62 @@ def transcribe_audio(audio_bytes, filename):
     )
     return response.text
 
-def resume_speech(transcription):
-    abstract_summary = abstract_summary_extraction(transcription)
-    key_points = key_points_extraction(transcription)
-    action_items = action_item_extraction(transcription)
-    return {
-        'record': transcription,
-        'abstract_summary': abstract_summary,
-        'key_points': key_points,
-        'action_items': action_items,
-    }
+def complete_missing_fields(entry, note_transcription, date):
+    # Obtener la lista de campos vacíos
+    empty_fields = []
+    if not entry.visit_type:
+        empty_fields.append({'field': 'visit_type', 'type': 'String'})
+    if not entry.symptoms:
+        empty_fields.append({'field': 'symptoms', 'type': 'Text'})
+    if not entry.diagnosis:
+        empty_fields.append({'field': 'diagnosis', 'type': 'Text'})
+    if not entry.treatment:
+        empty_fields.append({'field': 'treatment', 'type': 'Text'})
+    if not entry.prescribed_medications:
+        empty_fields.append({'field': 'prescribed_medications', 'type': 'Text'})
+    if not entry.follow_up_needed or entry.follow_up_needed is False:
+        empty_fields.append({'field': 'follow_up_needed', 'type': 'Boolean'})
+    if not entry.follow_up_date:
+        empty_fields.append({'field': 'follow_up_date', 'type': 'Date'})
 
-def abstract_summary_extraction(transcription):
+    # Generar el prompt para el cliente de OpenAI
+    prompt = (
+        f"The following is the transcription of a medical note:\n\n"
+        f"{note_transcription}\n\n"
+        f"The following fields are empty in the patient's entry:\n"
+    )
+    
+    for field in empty_fields:
+        prompt += f"- {field['field']} ({field['type']})\n"
+
+    prompt += (
+        f"If the necessary information to fill these fields is present in the transcription, "
+        f"please extract it and provide a short sentence for each field. "
+        f"Return the response as a dictionary in the following format:\n"
+        f"{{\n"
+        f"\"empty_value\": new_value,\n"
+        f"\"empty_value2\": new_value2\n"
+        f"}}\n\n"
+        f"Today's date is {date}. Ensure that the 'follow_up_date' field in the response dictionary always follows the format 'YYYY-MM-DD'."
+    )
+
+    # Llamada al cliente de OpenAI para completar los campos faltantes
     response = openai_client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         temperature=0,
         messages=[
             {
                 "role": "system",
-                "content": "You are a highly skilled AI trained in language comprehension and summarization. I would like you to read the following text and summarize it into a concise abstract paragraph. Aim to retain the most important points, providing a coherent and readable summary that could help a person understand the main points of the discussion without needing to read the entire text. Please avoid unnecessary details or tangential points."
+                "content": "You are a proficient AI with a specialty in extracting specific information from text. Based on the provided transcription, identify and extract the necessary information to fill in the missing fields in the patient's record. Each field should be filled with a short sentence if the information is available in the transcription."
             },
             {
                 "role": "user",
-                "content": transcription
+                "content": prompt
             }
         ]
     )
-    return response.choices[0].message.content
 
-def key_points_extraction(transcription):
-    response = openai_client.chat.completions.create(
-        model="gpt-4",
-        temperature=0,
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a proficient AI with a specialty in distilling information into key points. Based on the following text, identify and list the main points that were discussed or brought up. These should be the most important ideas, findings, or topics that are crucial to the essence of the discussion. Your goal is to provide a list that someone could read to quickly understand what was talked about."
-            },
-            {
-                "role": "user",
-                "content": transcription
-            }
-        ]
-    )
-    return response.choices[0].message.content
+    completion = response.choices[0].message.content
+    completed_fields = json.loads(completion)
 
-def action_item_extraction(transcription):
-    response = openai_client.chat.completions.create(
-        model="gpt-4",
-        temperature=0,
-        messages=[
-            {
-                "role": "system",
-                "content": "You are an AI expert in analyzing conversations and extracting action items. Please review the text and identify any tasks, assignments, or actions that were agreed upon or mentioned as needing to be done. These could be tasks assigned to specific individuals, or general actions that the group has decided to take. Please list these action items clearly and concisely."
-            },
-            {
-                "role": "user",
-                "content": transcription
-            }
-        ]
-    )
-    return response.choices[0].message.content
+    return completed_fields

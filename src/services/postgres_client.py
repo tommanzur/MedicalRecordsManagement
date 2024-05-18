@@ -14,6 +14,7 @@ from models.entry import Entry
 from models.users import User 
 from models.conversations import Conversation
 from models.text_embedding import TextEmbedding
+from services.audio_transcription import complete_missing_fields
 from services.embeddings_service import prepare_context, generate_chunks_and_embeddings
 from config import CHAT_MODEL
 from langchain_core.prompts import ChatPromptTemplate
@@ -142,6 +143,7 @@ class PostgresClient:
                 for key, value in kwargs.items():
                     setattr(entry, key, value)
                 session.commit()
+                session.add(entry)    
         except SQLAlchemyError as e:
             session.rollback()
             raise
@@ -160,8 +162,6 @@ class PostgresClient:
 
             for split_text, embedding_vector in zip(split_texts, embeddings_list):
 
-                #embedding_vector = Vector(embedding_vector)
-
                 text_embedding = TextEmbedding(
                     note_id=note_id,
                     patient_id=entry.patient_id,
@@ -170,8 +170,12 @@ class PostgresClient:
                     vector=embedding_vector
                 )
                 session.add(text_embedding)
-
             session.commit()
+
+            completed_fields = complete_missing_fields(entry, text, date=entry.date_of_visit)
+            if completed_fields:
+                self.update_entry(entry_id, **completed_fields)
+
             return True
         
         except SQLAlchemyError as e:
@@ -339,7 +343,7 @@ class PostgresClient:
                 .order_by(EntryEmbedding.vector.l2_distance(query_embedding))
                 .limit(limit)
             )
-
+            text_embedding_results.extend(entry_embeddings_query)
             return text_embedding_results
         
         except SQLAlchemyError as e:
@@ -353,7 +357,6 @@ class PostgresClient:
         query_embedding = query_embeddings[0]  # Usar el primer embedding generado
 
         similar_notes = self.search_similar_entries(query_embedding, patient_id=patient_id, limit=5)
-        entry = self.get_entries_of_one_patient(patient_id=patient_id)
         documents = [
             Document(
                 page_content=note.text)
