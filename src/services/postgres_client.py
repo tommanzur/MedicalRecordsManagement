@@ -93,13 +93,14 @@ class PostgresClient:
         session = self.Session()
         try:
             new_entry = Entry(**kwargs)
-            session.add(new_entry)
-            session.commit()
             entries_context = prepare_context([new_entry])
             entries_texts, embeddings_list = generate_chunks_and_embeddings(entries_context)
+            patient_id = int(new_entry.patient_id)
+            session.add(new_entry)
+            session.commit()
+            new_entry_id= int(new_entry.id)
             session.close()
-            self.store_entry_embeddings(patient_id=new_entry.patient_id, embeddings=embeddings_list, texts=entries_texts)
-
+            self.store_entry_embeddings(patient_id=patient_id, entry_id=new_entry_id, embeddings=embeddings_list, texts=entries_texts)
             return new_entry.id
         except SQLAlchemyError as e:
             session.rollback()
@@ -159,7 +160,8 @@ class PostgresClient:
             note_id = note.id
             split_texts, embeddings_list = generate_chunks_and_embeddings(text)
             entry = session.query(Entry).get(entry_id)
-
+            entry_id_saved=entry.id
+            patient_id_saved=entry.patient_id
             for split_text, embedding_vector in zip(split_texts, embeddings_list):
 
                 text_embedding = TextEmbedding(
@@ -171,10 +173,12 @@ class PostgresClient:
                 )
                 session.add(text_embedding)
             session.commit()
-
+            
             completed_fields = complete_missing_fields(entry, text, date=entry.date_of_visit)
             if completed_fields:
                 self.update_entry(entry_id, **completed_fields)
+            session.close()
+            self.updates_entry_embeddings(entry_id=entry_id_saved, patient_id=patient_id_saved)
 
             return True
         
@@ -309,12 +313,44 @@ class PostgresClient:
         finally:
             session.close()
 
-    def store_entry_embeddings(self, patient_id, embeddings, texts):
+    def get_entry_embedding_by_entry(self, entry_id):
+        """Recupera los embeddings de las entradas del paciente desde la base de datos."""
+        session = self.Session()
+        try:
+            query = session.query(EntryEmbedding).filter(EntryEmbedding.entry_id == entry_id).first()
+            entry_embedding = session.query(EntryEmbedding).get(query.id)
+            return entry_embedding
+        except SQLAlchemyError as e:
+            print(f"Failed to retrieve entry embeddings: {e}")
+            return None
+        finally:
+            session.close()
+
+    def store_entry_embeddings(self, patient_id, entry_id, embeddings, texts):
         """Almacena los embeddings de las entradas del paciente en la base de datos."""
         session = self.Session()
         try:
             for text, embedding in zip(texts, embeddings):
-                entry_embedding = EntryEmbedding(patient_id=patient_id, text=text, vector=embedding)
+                entry_embedding = EntryEmbedding(patient_id=patient_id, entry_id=entry_id, text=text, vector=embedding)
+                session.add(entry_embedding)
+                session.commit()
+        except SQLAlchemyError as e:
+            print(f"Failed to store entry embeddings: {e}")
+        finally:
+            session.close()
+
+    def updates_entry_embeddings(self, entry_id, patient_id):
+        """Almacena los embeddings de las entradas del paciente en la base de datos."""
+        entry_embedding = self.get_entry_embedding_by_entry(entry_id=entry_id)
+        session = self.Session()
+        session.delete(entry_embedding)
+        entry = session.query(Entry).get(entry_id)
+        entries_context = prepare_context([entry])
+        entries_texts, embeddings_list = generate_chunks_and_embeddings(entries_context)
+
+        try:
+            for text, embedding in zip(entries_texts, embeddings_list):
+                entry_embedding = EntryEmbedding(patient_id=patient_id, entry_id=entry_id, text=text, vector=embedding)
                 session.add(entry_embedding)
                 session.commit()
         except SQLAlchemyError as e:
