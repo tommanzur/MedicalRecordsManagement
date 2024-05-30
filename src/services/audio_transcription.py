@@ -38,11 +38,14 @@ def complete_missing_fields(entry, note_transcription, date):
 
     prompt += (
         f"If the necessary information to fill these fields is present in the transcription, "
-        f"please extract it and provide a short sentence for each field. "
+        f"please extract it and provide up to four words for each field. Do not add new information. "
+        f"For the 'visit_type' field, use only one of these options: routine visit, emergency visit, follow-up visit, initial consultation. "
+        f"For the 'prescribed_medications' field, use only drug names and commercial drug names. Do not include unknown medication names. "
+        f"If there is not enough information for a field, do not include it in the response dictionary. "
         f"Return the response as a dictionary in the following format:\n"
         f"{{\n"
-        f"\"empty_value\": new_value,\n"
-        f"\"empty_value2\": new_value2\n"
+        f"\"field_name\": \"value\",\n"
+        f"\"field_name2\": \"value2\"\n"
         f"}}\n\n"
         f"Today's date is {date}. Ensure that the 'follow_up_date' field in the response dictionary always follows the format 'YYYY-MM-DD'."
     )
